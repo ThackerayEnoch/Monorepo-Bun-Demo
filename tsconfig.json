@@ -1,0 +1,19 @@
+{
+  "extends": "@qntx/tsconfig/configs/bun.json",
+  "name": "monorepo-bun-demo",
+  "private": true,
+  "workspaces":[
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "bun run --cwd apps/web dev",
+    "check:web": "bun run --cwd apps/web typecheck",
+    "check:shared": "bun run --cwd packages/shared typecheck",
+    "check": "bun run check:web && bun run check:shared"
+  },
+  "devDependencies": {
+    "@qntx/tsconfig": "^1.0.1",
+    "typescript": "^7.0.2"
+  }
+}
