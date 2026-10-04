@@ -1,0 +1,10 @@
+{
+  "extends": "@qntx/tsconfig/configs/bun.json",
+  "compilerOptions": {
+    "types": ["bun-types"],
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

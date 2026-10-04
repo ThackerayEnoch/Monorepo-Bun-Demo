@@ -2,10 +2,7 @@
   "extends": "@qntx/tsconfig/configs/bun.json",
   "name": "monorepo-bun-demo",
   "private": true,
-  "workspaces":[
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "bun run --cwd apps/web dev",
     "check:web": "bun run --cwd apps/web typecheck",

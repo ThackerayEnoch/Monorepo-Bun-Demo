@@ -1,0 +1,9 @@
+{
+  "extends": "@qntx/tsconfig/configs/react-native.json",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@mobile/*": ["../packages/*/src"]
+    }
+  }
+}

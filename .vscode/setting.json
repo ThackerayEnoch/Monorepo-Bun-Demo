@@ -1,0 +1,4 @@
+   {
+     "oxc.typeAware": true,
+     "editor.codeActionsOnSave": { "source.fixAll.oxc": "always" }
+   }

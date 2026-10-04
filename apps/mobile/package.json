@@ -1,0 +1,30 @@
+{
+  "name": "@monorepo-demo/mobile",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@qntx/tsconfig": "^1.0.1",
+    "expo": "~57.0.26",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
+  },
+  "devDependencies": {
+    "@qntx/oxfmt": "^1.1.1",
+    "@qntx/oxlint": "^1.1.1",
+    "@testing-library/react-native": "^14.0.1",
+    "@types/bun": "^1.4.2",
+    "@types/jest": "^30.0.0",
+    "@types/react": "~19.2.2",
+    "jest": "^30.5.2",
+    "jest-expo": "^57.0.5",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true
+}

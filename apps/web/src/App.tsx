@@ -1,5 +1,8 @@
+import { RouterProvider } from "react-router";
+import {router} from "@web/router/router"
+
 function App(): React.ReactNode {
-  return <div>Hello World</div>;
+  return <RouterProvider router={router} />
 }
 
 export default App;
