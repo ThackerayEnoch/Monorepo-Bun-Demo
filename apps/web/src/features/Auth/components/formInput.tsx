@@ -4,12 +4,14 @@ import { useFormStatus } from "react-dom";
 type Props = {
   label: string;
   error?: boolean;
+  errorMsg?: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "placeholder">;
 
 export default function FormInput({
   label,
   id,
   error = false,
+  errorMsg,
   className = "",
   ...rest
 }: Props): React.ReactNode {
@@ -35,6 +37,11 @@ export default function FormInput({
       >
         {label}
       </label>
+      {error && errorMsg !== undefined && errorMsg !== "" && (
+        <p role="alert" className="text-xs text-red-500">
+          {errorMsg}
+        </p>
+      )}
     </div>
   );
 }

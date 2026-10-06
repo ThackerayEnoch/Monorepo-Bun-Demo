@@ -12,8 +12,8 @@ export type AuthService = {
 export function createAuthService(repo: AuthRepo, sessionRepo: SessionRepo): AuthService {
   return {
     async login(username: string, password: string): Promise<LoginResponse> {
-      const user = await repo.findUserByUsername(username);
-      const ok = await verifyPassword(password, user?.password ?? DUMMY_HASH);
+      const user = await repo.findUserByUsername(username.trim());
+      const ok = await verifyPassword(password.trim(), user?.password ?? DUMMY_HASH);
       if (!user || !ok) {
         throw new Error("INVALID_CREDENTIALS");
       }
@@ -29,10 +29,10 @@ export function createAuthService(repo: AuthRepo, sessionRepo: SessionRepo): Aut
       return { token };
     },
     async register(username: string, password: string): Promise<RegisterResponse> {
-      password = await hashPassword(password);
+      password = await hashPassword(password.trim());
       let user: { id: number; username: string } | undefined;
       try {
-        user = await repo.createUser(username, password);
+        user = await repo.createUser(username.trim(), password);
       } catch (error) {
         if (
           error &&

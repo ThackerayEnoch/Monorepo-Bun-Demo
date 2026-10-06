@@ -1,6 +1,7 @@
 import { ApiClientError, loginRequestSchema } from "@monorepo-demo/api";
 import { useState, useActionState } from "react";
 import { useNavigate } from "react-router";
+import { z } from "zod";
 
 import { authApi } from "./apiClient";
 import AuthLayout from "./components/authLayout";
@@ -11,19 +12,27 @@ import SocialButtons from "./components/socialButtons";
 type LoginFormState = {
   username: string;
   password: string;
-  error: string;
-  errorId: number;
+  usernameError: string;
+  passwordError: string;
+  formError: string;
+  usernameErrorId: number;
+  passwordErrorId: number;
+  formErrorId: number;
 };
 const initialLoginFormState: LoginFormState = {
   username: "",
   password: "",
-  error: "",
-  errorId: 0,
+  usernameError: "",
+  passwordError: "",
+  formError: "",
+  usernameErrorId: 0,
+  passwordErrorId: 0,
+  formErrorId: 0,
 };
 export default function LogIn(): React.ReactNode {
   const navigate = useNavigate();
   const handleAction = async (
-    _prevState: LoginFormState,
+    prevState: LoginFormState,
     formData: FormData,
   ): Promise<LoginFormState> => {
     const parsed = loginRequestSchema.safeParse({
@@ -31,7 +40,20 @@ export default function LogIn(): React.ReactNode {
       password: formData.get("password"),
     });
     if (!parsed.success) {
-      return { ...initialLoginFormState, error: parsed.error.message, errorId: Date.now() };
+      const { fieldErrors } = z.flattenError(parsed.error);
+      const raw = formData.get("username");
+      const username = typeof raw === "string" ? raw : "";
+      const usernameError = fieldErrors.username?.[0] ?? "";
+      const passwordError = fieldErrors.password?.[0] ?? "";
+      const now = Date.now();
+      return {
+        ...prevState,
+        username,
+        usernameError,
+        passwordError,
+        usernameErrorId: usernameError === "" ? 0 : now,
+        passwordErrorId: passwordError === "" ? 0 : now,
+      };
     }
     const { username } = parsed.data;
     const { password } = parsed.data;
@@ -44,59 +66,79 @@ export default function LogIn(): React.ReactNode {
     } catch (error) {
       if (error instanceof ApiClientError) {
         return {
+          ...prevState,
           username,
           password: "",
-          error: error.message,
-          errorId: Date.now(),
+          formError: error.message,
+          formErrorId: Date.now(),
         };
       }
       throw error;
     }
-    return {
-      username,
-      password,
-      error: "",
-      errorId: 0,
-    };
+    return initialLoginFormState;
   };
   const [formState, submitAction, isPending] = useActionState(handleAction, initialLoginFormState);
-  const [handledErrorId, setHandledErrorId] = useState<number>(0);
-  const hasError = formState.errorId !== 0 && handledErrorId !== formState.errorId;
-  const clearError = () => setHandledErrorId(formState.errorId);
+  const [handledUsernameErrorId, setHandledUsernameErrorId] = useState<number>(0);
+  const [handledPasswordErrorId, setHandledPasswordErrorId] = useState<number>(0);
+  const [handledFormErrorId, setHandledFormErrorId] = useState<number>(0);
+
+  const hasUsernameError =
+    formState.usernameErrorId !== 0 && handledUsernameErrorId !== formState.usernameErrorId;
+  const hasPasswordError =
+    formState.passwordErrorId !== 0 && handledPasswordErrorId !== formState.passwordErrorId;
+  const hasFormError = formState.formErrorId !== 0 && handledFormErrorId !== formState.formErrorId;
+
+  const clearUsernameError = () => {
+    if (hasUsernameError) {
+      setHandledUsernameErrorId(formState.usernameErrorId);
+    }
+    if (hasFormError) {
+      setHandledFormErrorId(formState.formErrorId);
+    }
+  };
+  const clearPasswordError = () => {
+    if (hasPasswordError) {
+      setHandledPasswordErrorId(formState.passwordErrorId);
+    }
+    if (hasFormError) {
+      setHandledFormErrorId(formState.formErrorId);
+    }
+  };
   return (
     <AuthLayout>
       {/* 1. 图标 + 标题 */}
       <div className="mb-8 flex flex-col items-center text-center">
         <img src="/qntx.svg" alt="QuantX" className="mb-5 h-16 w-16" />
-        <h1 className="text-2xl font-bold text-black">Welcome back</h1>
-        <p className="mt-1.5 text-sm text-gray-500">Please enter your details to sign in</p>
+        <h1 className="text-2xl font-bold text-black">欢迎回来</h1>
+        <p className="mt-1.5 text-sm text-gray-500">请输入您的信息以登录</p>
       </div>
 
       {/* 2. 表单 */}
       <form action={submitAction} className="flex flex-col gap-4">
         <FormInput
           id="username"
-          label="username"
+          label="用户名"
           type="text"
           name="username"
-          error={hasError}
-          onChange={clearError}
+          error={hasUsernameError}
+          onChange={clearUsernameError}
           defaultValue={formState?.username || ""}
+          errorMsg={formState.usernameError}
         />
-
         <div className="flex flex-col gap-2">
           <FormInput
             id="password"
-            label="Password"
+            label="密码"
             name="password"
             type="password"
-            error={hasError}
-            onChange={clearError}
+            error={hasPasswordError}
+            errorMsg={formState.passwordError}
+            onChange={clearPasswordError}
             defaultValue=""
           />
-          {hasError && (
+          {hasFormError && formState.formError && (
             <p role="alert" className="text-xs text-red-500">
-              {formState.error}
+              {formState.formError}
             </p>
           )}
           {/* 右对齐的忘记密码 */}
@@ -108,9 +150,15 @@ export default function LogIn(): React.ReactNode {
         <button
           type="submit"
           disabled={isPending}
-          className="mt-1 w-full rounded-lg bg-black py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+          className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-black py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isPending ? "Signing in..." : "Sign in"}
+          {isPending && (
+            <span
+              aria-hidden="true"
+              className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+            />
+          )}
+          {isPending ? "登录中..." : "登录"}
         </button>
       </form>
 
