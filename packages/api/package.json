@@ -1,4 +1,31 @@
 {
   "name": "@monorepo-demo/api",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "tsc",
+    "start": "bun dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "check": "bun run typecheck && bun run lint && bun run format:check"
+  },
+  "dependencies": {
+    "axios": "^1.20.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@qntx/oxfmt": "^1.1.1",
+    "@qntx/oxlint": "^1.1.1",
+    "@qntx/tsconfig": "^1.0.1",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.82.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "typescript": "^6.0.2"
+  }
 }

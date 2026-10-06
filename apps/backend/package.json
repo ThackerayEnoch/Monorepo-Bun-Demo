@@ -18,12 +18,18 @@
     "check": "bun run typecheck && bun run lint && bun run format:check"
   },
   "dependencies": {
-    "hono": "^4"
+    "@hono/zod-validator": "^0.9.1",
+    "@monorepo-demo/api": "workspace:*",
+    "bcrypt": "^6.0.0",
+    "hono": "^4",
+    "mysql2": "^3.24.5",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@qntx/oxfmt": "^1.1.1",
     "@qntx/oxlint": "^1.1.1",
     "@qntx/tsconfig": "^1.0.1",
+    "@types/bcrypt": "^6.0.0",
     "@types/bun": "^1.4.2",
     "@types/node": "^26.6.4",
     "bun-types": "1.4.2",

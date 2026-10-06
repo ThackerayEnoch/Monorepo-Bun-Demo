@@ -1,18 +1,21 @@
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
+import { createApp } from "./app";
+import { createAuthRepo } from "./auth/repo";
+import { createAuthService } from "./auth/service";
+import { createMemorySessionRepo } from "./auth/session.memory";
+import { createDatabase, migrate } from "./database/client";
+import { env } from "./env";
+//--------------------------------------------
+// 引入不同文件夹的service
+import { createTodoRepo } from "./home/repo";
+//--------------------------------------------
+await migrate();
 
-const app = new Hono()
-  .use('/api/*', cors())
-  .get('/api/hello', (c) => c.json({ message: 'hello from bun' }))
-  .post('/api/echo', async (c) => c.json(await c.req.json()))
+const database = createDatabase();
+const authRepo = createAuthRepo(database);
+const sessionRepo = createMemorySessionRepo();
+const authService = createAuthService(authRepo, sessionRepo);
+const app = createApp(createTodoRepo(database), authService);
 
-export type AppType = typeof app // 给前端做类型推导
-
-const server = {
-  port: 3001,
-  fetch(): Response {
-    return Response.json({ ok: true });
-  },
-};
+const server = { port: env.PORT, fetch: app.fetch };
 
 export default server;

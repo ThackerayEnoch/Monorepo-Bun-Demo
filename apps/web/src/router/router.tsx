@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router";
-import { Home } from "@web/pages/home";
-import { SignIn } from "@web/pages/signIn";
+
+import LogIn from "../features/Auth/LogIn";
+import { Home } from "../pages/home";
+import { setNavigate } from "../request/requestClient";
 
 const routes = [
   {
@@ -8,9 +10,10 @@ const routes = [
     element: <Home />,
   },
   {
-    path: "/sign-in",
-    element: <SignIn />,
+    path: "/login",
+    element: <LogIn />,
   },
 ];
 
 export const router = createBrowserRouter(routes);
+setNavigate((to) => void router.navigate(to));

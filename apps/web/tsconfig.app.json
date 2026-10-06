@@ -1,10 +1,7 @@
 {
   "extends": "@qntx/tsconfig/configs/vite-react.json",
   "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@web/*": ["./src/*"]
-    }
+    "strict": true
   },
   "include": ["src"]
 }
