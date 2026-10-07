@@ -16,6 +16,6 @@ const sessionRepo = createMemorySessionRepo();
 const authService = createAuthService(authRepo, sessionRepo);
 const app = createApp(createTodoRepo(database), authService);
 
-const server = { port: env.PORT, fetch: app.fetch };
+const server = { port: env.PORT, hostname: env.HOSTNAME, fetch: app.fetch };
 
 export default server;

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const schema = z.object({
   PORT: z.coerce.number().int().positive().default(3001),
+  HOSTNAME: z.string().min(1).default("localhost"),
   DB_HOST: z.string().min(1).default("127.0.0.1"),
   DB_PORT: z.coerce.number().int().positive().default(3306),
   DB_USER: z.string().min(1),

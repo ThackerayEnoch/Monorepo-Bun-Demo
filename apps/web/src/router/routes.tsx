@@ -11,7 +11,7 @@ export const routes: RouteObject[] = [
   {
     path: "/login",
     lazy: async () => {
-      const { default: LogIn } = await import("../features/Auth/LogIn");
+      const { default: LogIn } = await import("../features/Auth/pages/LogIn");
       return { Component: LogIn };
     },
   },

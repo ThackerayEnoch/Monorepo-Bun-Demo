@@ -3,11 +3,11 @@ import { useState, useActionState } from "react";
 import { useNavigate } from "react-router";
 import { z } from "zod";
 
-import { authApi } from "./apiClient";
-import AuthLayout from "./components/authLayout";
-import Divider from "./components/divider";
-import FormInput from "./components/formInput";
-import SocialButtons from "./components/socialButtons";
+import { authApi } from "../apiClient";
+import AuthLayout from "../components/authLayout";
+import Divider from "../components/divider";
+import FormInput from "../components/formInput";
+import SocialButtons from "../components/socialButtons";
 
 type LoginFormState = {
   username: string;

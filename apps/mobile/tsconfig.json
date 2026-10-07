@@ -1,9 +1,17 @@
 {
-  "extends": "@qntx/tsconfig/configs/react-native.json",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "paths": {
-      "@mobile/*": ["../packages/*/src"]
+      "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }

@@ -11,6 +11,6 @@
   },
   "devDependencies": {
     "@qntx/tsconfig": "^1.0.1",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.2"
   }
 }

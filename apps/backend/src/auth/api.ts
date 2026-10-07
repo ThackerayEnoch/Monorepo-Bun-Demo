@@ -1,8 +1,19 @@
 import { zValidator } from "@hono/zod-validator";
 import { loginRequestSchema, registerRequestSchema } from "@monorepo-demo/api";
 import { Hono } from "hono";
+import { setCookie } from "hono/cookie";
 
 import type { AuthService } from "./service";
+import { TOKEN_TTL_SEC } from "../utils/token";
+
+function setAuthCookie(c: Parameters<typeof setCookie>[0], token: string): void {
+  setCookie(c, "Authorization", `Bearer ${token}`, {
+    httpOnly: true,
+    maxAge: TOKEN_TTL_SEC,
+    path: "/",
+    sameSite: "Lax",
+  });
+}
 
 // Auth routes are kept independent so authentication can add its own session strategy.
 // oxlint-disable-next-line typescript/explicit-module-boundary-types
@@ -30,6 +41,7 @@ export function createAuthApi(service: AuthService) {
 
         try {
           const result = await service.login(username, password);
+          setAuthCookie(c, result.token);
 
           return c.json({ status: "ok", data: result, timestamp: Date.now() }, 200);
         } catch (error) {
@@ -69,6 +81,7 @@ export function createAuthApi(service: AuthService) {
 
         try {
           const result = await service.register(username, password);
+          setAuthCookie(c, result.token);
 
           return c.json({ status: "ok", data: result, timestamp: Date.now() }, 200);
         } catch (error) {
