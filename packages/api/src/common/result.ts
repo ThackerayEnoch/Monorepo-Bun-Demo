@@ -7,13 +7,26 @@ import type { ApiError } from "./apiError";
  * Type Result<T, K> = | { status: "ok"; data: T; error?: never; timestamp: number; } | { status:
  * "error"; data?: never; error: K; timestamp: number; };
  */
-// oxlint-disable-next-line typescript/no-unnecessary-type-parameters
-export function ResultSchema<T extends z.ZodType, E extends z.ZodType = typeof ApiErrorSchema>(
-  dataSchema: T,
-  errorSchema?: E,
-): z.ZodType {
-  const error = errorSchema ?? ApiErrorSchema;
+type ResultSchemaOf<T extends z.ZodType, E extends z.ZodType> = z.ZodDiscriminatedUnion<
+  [
+    z.ZodObject<{ status: z.ZodLiteral<"ok">; data: T; timestamp: z.ZodNumber }>,
+    z.ZodObject<{ status: z.ZodLiteral<"error">; error: E; timestamp: z.ZodNumber }>,
+  ]
+>;
 
+export function ResultSchema<T extends z.ZodType>(
+  dataSchema: T,
+): ResultSchemaOf<T, typeof ApiErrorSchema>;
+
+export function ResultSchema<T extends z.ZodType, E extends z.ZodType>(
+  dataSchema: T,
+  errorSchema: E,
+): ResultSchemaOf<T, E>;
+
+export function ResultSchema(
+  dataSchema: z.ZodType,
+  errorSchema: z.ZodType = ApiErrorSchema,
+): z.ZodType {
   return z.discriminatedUnion("status", [
     z.object({
       status: z.literal("ok"),
@@ -22,7 +35,7 @@ export function ResultSchema<T extends z.ZodType, E extends z.ZodType = typeof A
     }),
     z.object({
       status: z.literal("error"),
-      error,
+      error: errorSchema,
       timestamp: z.number(),
     }),
   ]);

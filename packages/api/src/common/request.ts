@@ -6,9 +6,11 @@ import type {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
+import { z } from "zod";
 
 import { ApiClientError } from "./apiClientError";
-import type { ApiError } from "./apiError";
+import { InvalidResponseError } from "./invalidResponseError";
+import { ResultSchema } from "./result";
 import type { Result } from "./result";
 
 export type ApiClientOptions = AxiosRequestConfig & {
@@ -43,30 +45,6 @@ function serializeParams(params: Record<string, unknown>): string {
   }
 
   return searchParams.join("&");
-}
-
-function getApiError(data: unknown): ApiError {
-  if (
-    typeof data === "object" &&
-    data !== null &&
-    "error" in data &&
-    data.error !== null &&
-    typeof data.error === "object" &&
-    "code" in data.error &&
-    "message" in data.error &&
-    typeof data.error.code === "string" &&
-    typeof data.error.message === "string"
-  ) {
-    return {
-      code: data.error.code,
-      message: data.error.message,
-    };
-  }
-
-  return {
-    code: "HTTP_ERROR",
-    message: "请求失败",
-  };
 }
 
 export class ApiClient {
@@ -124,14 +102,28 @@ export class ApiClient {
   async delete<T>(url: string, config?: RequestConfig): Promise<Result<T>> {
     return this.request<T>({ ...config, method: "DELETE", url });
   }
-
-  private handleResponse(response: AxiosResponse<Result<unknown>>): Result<unknown> {
-    const result = response.data;
-    if (result?.status === "ok") {
-      return result;
+  /**
+   * 解析后端返回，校验格式，区分成功和失败的请求。
+   *
+   * 成功返回 `{ status: "ok", data: T, timestamp: number }`， 失败返回 `{ status: "error", error: K,
+   * timestamp: number }`。
+   *
+   * 兼容以下两种业务写法：
+   *
+   * 1. HTTP status 一直是 200，通过 success 字段判断请求是否成功
+   * 2. 2xx 是请求成功，非 2xx 是请求失败
+   */
+  private handleResponse(response: AxiosResponse<unknown>): Result<unknown> {
+    const parsed = ResultSchema(z.unknown()).safeParse(response.data);
+    if (!parsed.success) {
+      throw new InvalidResponseError(response.status, response.data, parsed.error);
     }
 
-    const error = new ApiClientError(getApiError(result), response.status, result);
+    if (parsed.data.status === "ok") {
+      return parsed.data;
+    }
+
+    const error = new ApiClientError(parsed.data.error, response.status, response.data);
     this.notifyUnauthorized(response.status, error);
     throw error;
   }
@@ -141,8 +133,17 @@ export class ApiClient {
       throw error;
     }
 
+    const parsed = ResultSchema(z.unknown()).safeParse(error.response.data);
+    if (!parsed.success) {
+      throw new InvalidResponseError(error.response.status, error.response.data, parsed.error);
+    }
+
+    if (parsed.data.status === "ok") {
+      throw new InvalidResponseError(error.response.status, error.response.data);
+    }
+
     const apiError = new ApiClientError(
-      getApiError(error.response.data),
+      parsed.data.error,
       error.response.status,
       error.response.data,
     );

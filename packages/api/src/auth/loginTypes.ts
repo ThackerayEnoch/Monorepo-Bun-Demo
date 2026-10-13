@@ -22,4 +22,4 @@ export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
 export const loginResultSchema = ResultSchema(loginResponseSchema);
-export type LoginResult = z.infer<typeof loginResultSchema>;
+export type LoginResult = z.infer<ReturnType<typeof ResultSchema<typeof loginResultSchema>>>;

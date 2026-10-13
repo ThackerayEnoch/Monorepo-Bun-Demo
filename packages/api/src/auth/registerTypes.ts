@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ResultSchema } from "../common/result";
+import type { ResultSchema } from "../common/result";
 /** { username: string; password: string; } */
 export const registerRequestSchema = z.object({
   user: z
@@ -20,6 +20,6 @@ export const registerResponseSchema = z.object({
 });
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
-
-export const registerResultSchema = ResultSchema(registerResponseSchema);
-export type RegisterResult = z.infer<typeof registerResultSchema>;
+export type RegisterResult = z.infer<
+  ReturnType<typeof ResultSchema<typeof registerResponseSchema>>
+>;
